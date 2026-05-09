@@ -1,0 +1,1022 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KSC Manager Backend</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --ksc-primary: #3d2817;
+            --ksc-secondary: #6d5742;
+            --ksc-accent: #d4c6b8;
+            --ksc-light: #eee4db;
+            --ksc-bg: #fafaf9;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: var(--ksc-bg);
+            color: var(--ksc-primary);
+            line-height: 1.6;
+        }
+
+        .header {
+            background: linear-gradient(135deg, var(--ksc-primary) 0%, #2a1a0f 100%);
+            color: white;
+            padding: 1.5rem 2rem;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.15);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-content {
+            max-width: 1600px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .logo-circle {
+            width: 56px;
+            height: 56px;
+            background: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 300;
+            font-size: 1rem;
+            color: var(--ksc-primary);
+            letter-spacing: 3px;
+        }
+
+        .app-title h1 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+
+        .app-title p {
+            font-size: 0.875rem;
+            opacity: 0.9;
+        }
+
+        .tabs {
+            background: white;
+            border-bottom: 1px solid #e7e5e4;
+            overflow-x: auto;
+            white-space: nowrap;
+        }
+
+        .tabs-inner {
+            max-width: 1600px;
+            margin: 0 auto;
+            display: flex;
+            gap: 0.5rem;
+            padding: 0 2rem;
+        }
+
+        .tab {
+            padding: 1rem 1.5rem;
+            background: transparent;
+            border: none;
+            border-bottom: 3px solid transparent;
+            cursor: pointer;
+            font-size: 0.9375rem;
+            font-weight: 500;
+            color: var(--ksc-secondary);
+            transition: all 0.2s;
+        }
+
+        .tab:hover {
+            color: var(--ksc-primary);
+            background: var(--ksc-light);
+        }
+
+        .tab.active {
+            color: var(--ksc-primary);
+            border-bottom-color: var(--ksc-primary);
+            background: transparent;
+        }
+
+        .content {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .tab-pane {
+            display: none;
+        }
+
+        .tab-pane.active {
+            display: block;
+        }
+
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid #e7e5e4;
+        }
+
+        .page-title {
+            font-size: 1.75rem;
+            font-weight: 600;
+            color: var(--ksc-primary);
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.9375rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: var(--ksc-primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #2a1a0f;
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: var(--ksc-primary);
+            border: 1px solid var(--ksc-primary);
+        }
+
+        .btn-secondary:hover {
+            background: var(--ksc-light);
+        }
+
+        .btn-success {
+            background: #16a34a;
+            color: white;
+        }
+
+        .btn-danger {
+            background: #dc2626;
+            color: white;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            border-left: 4px solid var(--ksc-primary);
+        }
+
+        .stat-label {
+            font-size: 0.875rem;
+            color: var(--ksc-secondary);
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--ksc-primary);
+        }
+
+        .table-container {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead {
+            background: var(--ksc-light);
+        }
+
+        th {
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+            color: var(--ksc-primary);
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        td {
+            padding: 1rem;
+            border-bottom: 1px solid #e7e5e4;
+            font-size: 0.9375rem;
+        }
+
+        tbody tr:hover {
+            background: var(--ksc-light);
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 0.375rem 0.75rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .badge-high {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .badge-medium {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .badge-low {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .badge-open {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .badge-closed {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .action-btn {
+            padding: 0.5rem 1rem;
+            margin: 0 0.25rem;
+            font-size: 0.875rem;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            background: var(--ksc-accent);
+            color: var(--ksc-primary);
+            font-weight: 500;
+        }
+
+        .action-btn:hover {
+            background: var(--ksc-secondary);
+            color: white;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            overflow-y: auto;
+        }
+
+        .modal.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 12px;
+            max-width: 900px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+        }
+
+        .modal-header {
+            padding: 1.5rem 2rem;
+            border-bottom: 1px solid #e7e5e4;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--ksc-primary);
+        }
+
+        .modal-close {
+            font-size: 1.5rem;
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--ksc-secondary);
+            padding: 0.5rem;
+        }
+
+        .modal-body {
+            padding: 2rem;
+        }
+
+        .modal-footer {
+            padding: 1.5rem 2rem;
+            border-top: 1px solid #e7e5e4;
+            display: flex;
+            justify-content: flex-end;
+            gap: 1rem;
+        }
+
+        .form-section {
+            margin-bottom: 2rem;
+        }
+
+        .section-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: var(--ksc-primary);
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+            color: var(--ksc-secondary);
+        }
+
+        .form-input,
+        .form-select,
+        .form-textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #e7e5e4;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-family: inherit;
+        }
+
+        .form-textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        .form-input:focus,
+        .form-select:focus,
+        .form-textarea:focus {
+            outline: none;
+            border-color: var(--ksc-primary);
+        }
+
+        .checkbox-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .checkbox-item input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+        }
+
+        .swms-card {
+            background: white;
+            border: 1px solid #e7e5e4;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .swms-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 1rem;
+        }
+
+        .swms-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: var(--ksc-primary);
+        }
+
+        .swms-meta {
+            font-size: 0.875rem;
+            color: var(--ksc-secondary);
+            margin-top: 0.5rem;
+        }
+
+        .inspection-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            border-bottom: 1px solid #e7e5e4;
+        }
+
+        .inspection-item:last-child {
+            border-bottom: none;
+        }
+
+        .pass-fail-btns {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .pass-btn,
+        .fail-btn {
+            padding: 0.5rem 1.25rem;
+            border: none;
+            border-radius: 4px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .pass-btn {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .pass-btn.active {
+            background: #16a34a;
+            color: white;
+        }
+
+        .fail-btn {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .fail-btn.active {
+            background: #dc2626;
+            color: white;
+        }
+
+        .alert {
+            padding: 1rem 1.5rem;
+            border-radius: 6px;
+            margin-bottom: 1.5rem;
+            font-size: 0.9375rem;
+        }
+
+        .alert-info {
+            background: #eff6ff;
+            border-left: 4px solid #3b82f6;
+            color: #1e40af;
+        }
+
+        .alert-success {
+            background: #f0fdf4;
+            border-left: 4px solid #16a34a;
+            color: #065f46;
+        }
+
+        .alert-warning {
+            background: #fffbeb;
+            border-left: 4px solid #f59e0b;
+            color: #92400e;
+        }
+
+        footer {
+            background: white;
+            padding: 2rem;
+            text-align: center;
+            border-top: 1px solid #e7e5e4;
+            margin-top: 3rem;
+            color: var(--ksc-secondary);
+            font-size: 0.875rem;
+        }
+
+        footer strong {
+            color: var(--ksc-primary);
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="header-content">
+            <div class="logo-section">
+                <div class="logo-circle">KSC</div>
+                <div class="app-title">
+                    <h1>Manager Backend</h1>
+                    <p id="client-name">ABC Construction Pty Ltd</p>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <nav class="tabs">
+        <div class="tabs-inner">
+            <button class="tab active" onclick="showTab(event, 'incidents')">Incidents</button>
+            <button class="tab" onclick="showTab(event, 'hazards')">Hazards</button>
+            <button class="tab" onclick="showTab(event, 'actions')">Corrective Actions</button>
+            <button class="tab" onclick="showTab(event, 'quality')">Quality NCRs</button>
+            <button class="tab" onclick="showTab(event, 'wcomp')">Workers Comp</button>
+            <button class="tab" onclick="showTab(event, 'swms')">SWMS Library</button>
+            <button class="tab" onclick="showTab(event, 'inspections')">Site Inspections</button>
+        </div>
+    </nav>
+
+    <main class="content">
+
+        <!-- INCIDENTS TAB (Existing - simplified for space) -->
+        <div id="tab-incidents" class="tab-pane active">
+            <div class="page-header">
+                <h2 class="page-title">Incidents Register</h2>
+                <button class="btn btn-primary" onclick="openModal('incident-modal')">+ Add Incident</button>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-label">Total Incidents</div>
+                    <div class="stat-value">24</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Open</div>
+                    <div class="stat-value">8</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Notifiable</div>
+                    <div class="stat-value">2</div>
+                </div>
+            </div>
+
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Date</th>
+                            <th>Location</th>
+                            <th>Description</th>
+                            <th>Classification</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="incidents-table">
+                        <tr>
+                            <td>INC-2026-001</td>
+                            <td>08/05/2026</td>
+                            <td>Building 3, Level 2</td>
+                            <td>Worker slipped on wet floor</td>
+                            <td><span class="badge badge-medium">First Aid</span></td>
+                            <td><span class="badge badge-open">Open</span></td>
+                            <td>
+                                <button class="action-btn" onclick="classifyIncident()">Classify</button>
+                                <button class="action-btn" onclick="openInvestigation()">Investigate</button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- SWMS LIBRARY TAB (NEW) -->
+        <div id="tab-swms" class="tab-pane">
+            <div class="page-header">
+                <h2 class="page-title">SWMS Library</h2>
+                <div>
+                    <button class="btn btn-secondary" onclick="importSWMS()" style="margin-right: 1rem;">
+                        📥 Import SWMS (PDF/Word)
+                    </button>
+                    <button class="btn btn-primary" onclick="openModal('swms-modal')">
+                        + Create New SWMS
+                    </button>
+                </div>
+            </div>
+
+            <div class="alert alert-info">
+                <strong>SWMS Templates:</strong> Pre-loaded with legally compliant templates based on WHS Act 2011 and Safe Work Australia Codes of Practice. Fully customizable for your sites.
+            </div>
+
+            <div id="swms-library">
+                <!-- SWMS Card 1 -->
+                <div class="swms-card">
+                    <div class="swms-header">
+                        <div>
+                            <div class="swms-title">Working at Heights</div>
+                            <div class="swms-meta">
+                                <span class="badge badge-high">High Risk</span>
+                                <span style="margin-left: 1rem;">Last Updated: 02/05/2026</span>
+                                <span style="margin-left: 1rem;">Version 1.2</span>
+                            </div>
+                        </div>
+                        <div>
+                            <button class="action-btn" onclick="editSWMS('heights')">Edit</button>
+                            <button class="action-btn" onclick="viewSWMS('heights')">View</button>
+                            <button class="action-btn" onclick="exportSWMSPDF('heights')">Export PDF</button>
+                        </div>
+                    </div>
+                    <p style="margin-top: 1rem; color: var(--ksc-secondary); font-size: 0.9375rem;">
+                        Construction work at height >2m. Includes scaffolding, ladders, roofs. Complies with WHS Reg 2011 Part 4.4.
+                    </p>
+                </div>
+
+                <!-- SWMS Card 2 -->
+                <div class="swms-card">
+                    <div class="swms-header">
+                        <div>
+                            <div class="swms-title">Electrical Work</div>
+                            <div class="swms-meta">
+                                <span class="badge badge-high">High Risk</span>
+                                <span style="margin-left: 1rem;">Last Updated: 01/05/2026</span>
+                                <span style="margin-left: 1rem;">Version 1.1</span>
+                            </div>
+                        </div>
+                        <div>
+                            <button class="action-btn" onclick="editSWMS('electrical')">Edit</button>
+                            <button class="action-btn" onclick="viewSWMS('electrical')">View</button>
+                            <button class="action-btn" onclick="exportSWMSPDF('electrical')">Export PDF</button>
+                        </div>
+                    </div>
+                    <p style="margin-top: 1rem; color: var(--ksc-secondary); font-size: 0.9375rem;">
+                        Live electrical work >50V AC. Isolation, lockout/tagout, RCD protection. Complies with WHS Reg 2011 Part 4.6.
+                    </p>
+                </div>
+
+                <!-- SWMS Card 3 -->
+                <div class="swms-card">
+                    <div class="swms-header">
+                        <div>
+                            <div class="swms-title">Excavation Work</div>
+                            <div class="swms-meta">
+                                <span class="badge badge-high">High Risk</span>
+                                <span style="margin-left: 1rem;">Last Updated: 30/04/2026</span>
+                                <span style="margin-left: 1rem;">Version 1.0</span>
+                            </div>
+                        </div>
+                        <div>
+                            <button class="action-btn" onclick="editSWMS('excavation')">Edit</button>
+                            <button class="action-btn" onclick="viewSWMS('excavation')">View</button>
+                            <button class="action-btn" onclick="exportSWMSPDF('excavation')">Export PDF</button>
+                        </div>
+                    </div>
+                    <p style="margin-top: 1rem; color: var(--ksc-secondary); font-size: 0.9375rem;">
+                        Excavations >1.5m depth. DBYD, shoring/battering, edge protection. Complies with WHS Reg s.291(d).
+                    </p>
+                </div>
+
+                <!-- SWMS Card 4 -->
+                <div class="swms-card">
+                    <div class="swms-header">
+                        <div>
+                            <div class="swms-title">Confined Spaces</div>
+                            <div class="swms-meta">
+                                <span class="badge badge-high">High Risk</span>
+                                <span style="margin-left: 1rem;">Last Updated: 28/04/2026</span>
+                                <span style="margin-left: 1rem;">Version 1.3</span>
+                            </div>
+                        </div>
+                        <div>
+                            <button class="action-btn" onclick="editSWMS('confined')">Edit</button>
+                            <button class="action-btn" onclick="viewSWMS('confined')">View</button>
+                            <button class="action-btn" onclick="exportSWMSPDF('confined')">Export PDF</button>
+                        </div>
+                    </div>
+                    <p style="margin-top: 1rem; color: var(--ksc-secondary); font-size: 0.9375rem;">
+                        Entry into tanks, pits, vessels. Atmosphere testing, permits, rescue plan. Complies with WHS Reg Part 4.3.
+                    </p>
+                </div>
+
+                <!-- SWMS Card 5 -->
+                <div class="swms-card">
+                    <div class="swms-header">
+                        <div>
+                            <div class="swms-title">Manual Handling</div>
+                            <div class="swms-meta">
+                                <span class="badge badge-medium">Medium Risk</span>
+                                <span style="margin-left: 1rem;">Last Updated: 25/04/2026</span>
+                                <span style="margin-left: 1rem;">Version 1.0</span>
+                            </div>
+                        </div>
+                        <div>
+                            <button class="action-btn" onclick="editSWMS('manual')">Edit</button>
+                            <button class="action-btn" onclick="viewSWMS('manual')">View</button>
+                            <button class="action-btn" onclick="exportSWMSPDF('manual')">Export PDF</button>
+                        </div>
+                    </div>
+                    <p style="margin-top: 1rem; color: var(--ksc-secondary); font-size: 0.9375rem;">
+                        Lifting, carrying, repetitive tasks. Weight limits, mechanical aids. Complies with WHS Reg Part 4.2.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- SITE INSPECTIONS TAB (NEW) -->
+        <div id="tab-inspections" class="tab-pane">
+            <div class="page-header">
+                <h2 class="page-title">Site Inspections</h2>
+                <button class="btn btn-primary" onclick="openModal('inspection-modal')">
+                    + Conduct Inspection
+                </button>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-label">Inspections This Month</div>
+                    <div class="stat-value">12</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Average Pass Rate</div>
+                    <div class="stat-value">87%</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Non-Conformances</div>
+                    <div class="stat-value">8</div>
+                </div>
+            </div>
+
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Inspection ID</th>
+                            <th>Date</th>
+                            <th>Inspector</th>
+                            <th>Site</th>
+                            <th>Pass Rate</th>
+                            <th>Rating</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="inspections-table">
+                        <tr>
+                            <td>INSP-2026-001</td>
+                            <td>08/05/2026</td>
+                            <td>John Smith</td>
+                            <td>Building 3</td>
+                            <td>92%</td>
+                            <td><span class="badge badge-low">Satisfactory</span></td>
+                            <td>
+                                <button class="action-btn" onclick="viewInspection()">View</button>
+                                <button class="action-btn" onclick="exportInspectionPDF()">Export PDF</button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Other tabs abbreviated for space -->
+        <div id="tab-hazards" class="tab-pane">
+            <h2 class="page-title">Hazards Register</h2>
+            <p>Hazards content here...</p>
+        </div>
+
+        <div id="tab-actions" class="tab-pane">
+            <h2 class="page-title">Corrective Actions</h2>
+            <p>Actions content here...</p>
+        </div>
+
+        <div id="tab-quality" class="tab-pane">
+            <h2 class="page-title">Quality NCRs</h2>
+            <p>Quality content here...</p>
+        </div>
+
+        <div id="tab-wcomp" class="tab-pane">
+            <h2 class="page-title">Workers Compensation</h2>
+            <p>W/Comp content here...</p>
+        </div>
+
+    </main>
+
+    <!-- INSPECTION MODAL -->
+    <div id="inspection-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Conduct Site Inspection</h3>
+                <button class="modal-close" onclick="closeModal('inspection-modal')">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-section">
+                    <div class="section-title">Inspection Details</div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Inspector Name *</label>
+                        <input type="text" class="form-input" id="inspector-name" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Site/Location *</label>
+                        <input type="text" class="form-input" id="inspection-site" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Inspection Type *</label>
+                        <select class="form-select" id="inspection-type">
+                            <option>General Site Inspection</option>
+                            <option>Scaffolding Inspection</option>
+                            <option>Electrical Compliance</option>
+                            <option>Plant & Equipment</option>
+                            <option>Excavation Safety</option>
+                            <option>Emergency Preparedness</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <div class="section-title">Inspection Checklist</div>
+                    
+                    <div class="alert alert-info">
+                        Mark each item as Pass or Fail. Fails will auto-create corrective actions.
+                    </div>
+
+                    <div id="inspection-checklist">
+                        <div class="inspection-item">
+                            <span>Site tidy, materials stored safely</span>
+                            <div class="pass-fail-btns">
+                                <button class="pass-btn" onclick="togglePass(this)">Pass</button>
+                                <button class="fail-btn" onclick="toggleFail(this)">Fail</button>
+                            </div>
+                        </div>
+
+                        <div class="inspection-item">
+                            <span>Scaffolding tagged (green/red)</span>
+                            <div class="pass-fail-btns">
+                                <button class="pass-btn" onclick="togglePass(this)">Pass</button>
+                                <button class="fail-btn" onclick="toggleFail(this)">Fail</button>
+                            </div>
+                        </div>
+
+                        <div class="inspection-item">
+                            <span>Guardrails present and secure</span>
+                            <div class="pass-fail-btns">
+                                <button class="pass-btn" onclick="togglePass(this)">Pass</button>
+                                <button class="fail-btn" onclick="toggleFail(this)">Fail</button>
+                            </div>
+                        </div>
+
+                        <div class="inspection-item">
+                            <span>RCDs tested and tagged</span>
+                            <div class="pass-fail-btns">
+                                <button class="pass-btn" onclick="togglePass(this)">Pass</button>
+                                <button class="fail-btn" onclick="toggleFail(this)">Fail</button>
+                            </div>
+                        </div>
+
+                        <div class="inspection-item">
+                            <span>PPE worn correctly (hard hats, hi-vis, boots)</span>
+                            <div class="pass-fail-btns">
+                                <button class="pass-btn" onclick="togglePass(this)">Pass</button>
+                                <button class="fail-btn" onclick="toggleFail(this)">Fail</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Overall Rating</label>
+                    <select class="form-select" id="overall-rating">
+                        <option>Satisfactory</option>
+                        <option>Needs Improvement</option>
+                        <option>Unsatisfactory</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Comments/Observations</label>
+                    <textarea class="form-textarea" id="inspection-comments"></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('inspection-modal')">Cancel</button>
+                <button class="btn btn-success" onclick="submitInspection()">Complete Inspection</button>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        Powered by <strong>King Strategies Consulting</strong>
+    </footer>
+
+    <script>
+        // CONFIGURATION
+        const GOOGLE_SCRIPT_URL = 'YOUR_GOOGLE_SCRIPT_URL_HERE';  // ← CHANGE THIS!
+        const CLIENT_NAME = 'ABC Construction Pty Ltd';  // ← CHANGE THIS!
+
+        document.getElementById('client-name').textContent = CLIENT_NAME;
+
+        // Tab switching
+        function showTab(event, tabId) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+            
+            event.currentTarget.classList.add('active');
+            document.getElementById('tab-' + tabId).classList.add('active');
+        }
+
+        // Modal controls
+        function openModal(modalId) {
+            document.getElementById(modalId).classList.add('active');
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+        }
+
+        // Pass/Fail toggle
+        function togglePass(btn) {
+            const failBtn = btn.parentElement.querySelector('.fail-btn');
+            btn.classList.add('active');
+            failBtn.classList.remove('active');
+        }
+
+        function toggleFail(btn) {
+            const passBtn = btn.parentElement.querySelector('.pass-btn');
+            btn.classList.add('active');
+            passBtn.classList.remove('active');
+        }
+
+        // Submit inspection
+        function submitInspection() {
+            const data = {
+                action: 'submitInspection',
+                inspector: document.getElementById('inspector-name').value,
+                site: document.getElementById('inspection-site').value,
+                type: document.getElementById('inspection-type').value,
+                rating: document.getElementById('overall-rating').value,
+                comments: document.getElementById('inspection-comments').value,
+                client: CLIENT_NAME,
+                timestamp: new Date().toISOString()
+            };
+
+            fetch(GOOGLE_SCRIPT_URL, {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            }).then(() => {
+                alert('Inspection submitted successfully!');
+                closeModal('inspection-modal');
+                location.reload();
+            }).catch(err => {
+                alert('Error submitting inspection. Please try again.');
+                console.error(err);
+            });
+        }
+
+        // SWMS functions
+        function editSWMS(swmsId) {
+            alert('Edit SWMS: ' + swmsId + '\n\nThis will open the SWMS editor where you can modify hazards, controls, PPE, etc.');
+        }
+
+        function viewSWMS(swmsId) {
+            alert('View SWMS: ' + swmsId + '\n\nThis will open the full SWMS document in read-only mode.');
+        }
+
+        function exportSWMSPDF(swmsId) {
+            alert('Export PDF: ' + swmsId + '\n\nGenerating PDF of SWMS...');
+        }
+
+        function importSWMS() {
+            alert('Import SWMS\n\nYou can upload existing Word or PDF SWMS documents. The system will extract the content and convert it to the KSC format.');
+        }
+
+        // Other placeholder functions
+        function classifyIncident() { alert('Classify incident (LTI/MTI/First Aid)'); }
+        function openInvestigation() { alert('Open ICAM investigation'); }
+        function viewInspection() { alert('View inspection details'); }
+        function exportInspectionPDF() { alert('Export inspection as PDF'); }
+    </script>
+</body>
+</html>
